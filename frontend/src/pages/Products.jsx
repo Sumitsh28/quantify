@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { Plus, X, Filter, Download, Laptop, ChevronRight, ChevronLeft } from 'lucide-react';
-import { fetchProducts, createProduct, updateProduct } from '../services/api';
+import { Plus, X, Filter, Download, Laptop, ChevronRight, ChevronLeft, Search } from 'lucide-react';
+import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/api';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -33,6 +33,14 @@ const ProductModal = ({ isOpen, onClose, product }) => {
     }
   });
 
+  useEffect(() => {
+    reset(product || {
+        name: '', sku: '', category: '', description: '', 
+        price: 0, quantity_in_stock: 0, threshold: 10,
+        supplier_name: '', supplier_part_number: '', visibility_status: 'Active'
+    });
+  }, [product, reset]);
+
   const visibility = watch('visibility_status');
 
   const mutation = useMutation({
@@ -48,6 +56,22 @@ const ProductModal = ({ isOpen, onClose, product }) => {
     }
   });
 
+  const deleteMut = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['products']);
+      toast.success('Product deleted');
+      onClose();
+    },
+    onError: (error) => toast.error(error.response?.data?.detail || 'Cannot delete product')
+  });
+
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to delete this product?')) {
+      deleteMut.mutate(product.id);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -56,6 +80,11 @@ const ProductModal = ({ isOpen, onClose, product }) => {
         <div className="flex justify-between items-center px-6 py-4 border-b border-outline-variant/30 shrink-0">
           <h2 className="headline-md">{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
           <div className="flex items-center gap-3">
+            {isEditing && (
+                <button type="button" onClick={handleDelete} disabled={deleteMut.isLoading} className="btn-secondary text-error border-error/30 hover:bg-error-container/20 px-6">
+                    Delete
+                </button>
+            )}
             <button type="button" onClick={onClose} className="btn-secondary px-6">Cancel</button>
             <button onClick={handleSubmit((data) => mutation.mutate(isEditing ? { id: product.id, ...data } : data))} disabled={isSubmitting} className="btn-primary flex items-center gap-2 px-6">
               Save Product
@@ -179,8 +208,14 @@ const ProductModal = ({ isOpen, onClose, product }) => {
 const Products = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const { data: products, isLoading } = useQuery({ queryKey: ['products'], queryFn: fetchProducts });
+
+  const filteredProducts = products?.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.sku.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -202,6 +237,14 @@ const Products = () => {
 
       <div className="flex justify-between items-center mb-6">
         <div className="flex-1 max-w-md relative">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
+          <input 
+            type="text" 
+            placeholder="Search products by name or SKU..." 
+            className="input-field pl-10 bg-surface-low border-outline-variant/50 w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <div className="flex items-center gap-3">
             <button onClick={openCreate} className="btn-primary flex items-center gap-2 px-4 py-1.5 text-sm">
@@ -226,10 +269,10 @@ const Products = () => {
           <tbody>
             {isLoading ? (
               <tr><td colSpan="6" className="p-8 text-center text-on-surface-variant">Loading products...</td></tr>
-            ) : products?.length === 0 ? (
+            ) : filteredProducts?.length === 0 ? (
               <tr><td colSpan="6" className="p-8 text-center text-on-surface-variant">No products found.</td></tr>
             ) : (
-              products?.map(product => (
+              filteredProducts?.map(product => (
                 <tr key={product.id} className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors cursor-pointer" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>
                   <td className="px-5 py-4 flex items-center gap-4">
                     <div className="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant shrink-0">
@@ -259,10 +302,10 @@ const Products = () => {
         <div className="block md:hidden divide-y divide-outline-variant/30">
           {isLoading ? (
             <div className="p-6 text-center text-on-surface-variant">Loading products...</div>
-          ) : products?.length === 0 ? (
+          ) : filteredProducts?.length === 0 ? (
             <div className="p-6 text-center text-on-surface-variant">No products found.</div>
           ) : (
-            products?.map(product => (
+            filteredProducts?.map(product => (
               <div key={product.id} onClick={() => { setEditingProduct(product); setIsModalOpen(true); }} className="p-4 hover:bg-surface-variant/30 transition-colors cursor-pointer active:bg-surface-variant/50">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-start gap-3">
@@ -290,7 +333,7 @@ const Products = () => {
         </div>
         
         <div className="p-4 border-t border-outline-variant/30 flex items-center justify-between text-sm text-on-surface-variant bg-surface-container/30">
-            <span>Showing {products?.length ? `1-${products.length}` : '0'} of {products?.length || 0} products</span>
+            <span>Showing {filteredProducts?.length ? `1-${filteredProducts.length}` : '0'} of {filteredProducts?.length || 0} products</span>
             <div className="flex items-center gap-4">
                 <button className="flex items-center hover:text-on-surface disabled:opacity-50" disabled><ChevronLeft size={16}/> Page 1 of 1 <ChevronRight size={16}/></button>
             </div>

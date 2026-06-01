@@ -62,3 +62,36 @@ def test_delete_product(client):
     
     get_res = client.get(f"/api/v1/products/{product_id}")
     assert get_res.status_code == 404
+
+def test_create_product_duplicate_sku(client):
+    # Requirement: Product SKU must be unique
+    client.post("/api/v1/products", json={
+        "name": "First Product",
+        "sku": "UNIQUE-SKU",
+        "price": 10.00,
+        "quantity_in_stock": 10
+    })
+    
+    # Try creating second product with same SKU
+    res2 = client.post("/api/v1/products", json={
+        "name": "Second Product",
+        "sku": "UNIQUE-SKU",
+        "price": 20.00,
+        "quantity_in_stock": 20
+    })
+    
+    # Should return 409 Conflict
+    assert res2.status_code == 409
+    assert "already exists" in res2.json()["detail"].lower()
+
+def test_create_product_negative_quantity(client):
+    # Requirement: Product quantity cannot be negative
+    res = client.post("/api/v1/products", json={
+        "name": "Negative Qty Product",
+        "sku": "NEG-123",
+        "price": 10.00,
+        "quantity_in_stock": -5
+    })
+    
+    # Pydantic should block it and return 422 Unprocessable Entity
+    assert res.status_code == 422

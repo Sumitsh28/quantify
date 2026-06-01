@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { Plus, Trash2, X, Activity, User, Mail } from 'lucide-react';
+import { Plus, Trash2, X, Activity, User, Mail, Search } from 'lucide-react';
 import { fetchCustomers, createCustomer, deleteCustomer } from '../services/api';
 
 const customerSchema = z.object({
@@ -83,6 +83,7 @@ const CustomerModal = ({ isOpen, onClose }) => {
 
 const Customers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { data: customers, isLoading } = useQuery({ queryKey: ['customers'], queryFn: fetchCustomers });
   const queryClient = useQueryClient();
   
@@ -109,6 +110,11 @@ const Customers = () => {
     }
   };
 
+  const filteredCustomers = customers?.filter(c => 
+    c.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="max-w-[1200px] mx-auto animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
@@ -116,9 +122,21 @@ const Customers = () => {
             <h1 className="headline-lg text-on-surface">Customers</h1>
             <p className="text-on-surface-variant text-sm mt-1">Manage your customer relationships.</p>
         </div>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 justify-center w-full sm:w-auto">
-          <Plus size={18} /> Add Customer
-        </button>
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64 hidden sm:block">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
+            <input 
+              type="text" 
+              placeholder="Search by name or email..." 
+              className="input-field pl-10 bg-surface-low border-outline-variant/50 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 justify-center w-full sm:w-auto">
+            <Plus size={18} /> Add Customer
+          </button>
+        </div>
       </div>
 
       <div className="surface-low rounded-lg border border-outline-variant flex flex-col">
@@ -135,10 +153,10 @@ const Customers = () => {
           <tbody>
             {isLoading ? (
               <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">Loading customers...</td></tr>
-            ) : customers?.length === 0 ? (
-              <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">No customers found. Add one above.</td></tr>
+            ) : filteredCustomers?.length === 0 ? (
+              <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">No customers found.</td></tr>
             ) : (
-              customers?.map(customer => (
+              filteredCustomers?.map(customer => (
                 <tr key={customer.id} className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors">
                   <td className="px-5 py-4 font-medium flex items-center gap-3 text-on-surface">
                     <div className="w-8 h-8 rounded-full bg-secondary-fixed-dim/20 text-secondary flex items-center justify-center font-bold">
@@ -161,10 +179,10 @@ const Customers = () => {
         <div className="block md:hidden divide-y divide-outline-variant/30">
             {isLoading ? (
               <div className="p-6 text-center text-on-surface-variant">Loading customers...</div>
-            ) : customers?.length === 0 ? (
-              <div className="p-6 text-center text-on-surface-variant">No customers found. Add one above.</div>
+            ) : filteredCustomers?.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant">No customers found.</div>
             ) : (
-              customers?.map(customer => (
+              filteredCustomers?.map(customer => (
                 <div key={customer.id} className="p-4 hover:bg-surface-variant/30 transition-colors">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-3">

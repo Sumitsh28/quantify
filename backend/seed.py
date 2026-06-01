@@ -27,11 +27,11 @@ def seed():
 
     # 2. Seed Customers
     customers = [
-        models.Customer(full_name="Alice Johnson", email="alice.j@example.com", phone_number="+1-555-0100"),
-        models.Customer(full_name="Bob Smith", email="bob.s@example.com", phone_number="+1-555-0101"),
-        models.Customer(full_name="Charlie Brown", email="charlie.b@example.com", phone_number="+1-555-0102"),
-        models.Customer(full_name="Diana Prince", email="diana.p@example.com", phone_number="+1-555-0103"),
-        models.Customer(full_name="Evan Davis", email="evan.d@example.com", phone_number="+1-555-0104"),
+        models.Customer(full_name="Rahul Sharma", email="rahul.s@example.com", phone_number="+91-9876543210"),
+        models.Customer(full_name="Priya Patel", email="priya.p@example.com", phone_number="+91-9876543211"),
+        models.Customer(full_name="Amit Singh", email="amit.s@example.com", phone_number="+91-9876543212"),
+        models.Customer(full_name="Neha Gupta", email="neha.g@example.com", phone_number="+91-9876543213"),
+        models.Customer(full_name="Rohan Desai", email="rohan.d@example.com", phone_number="+91-9876543214"),
     ]
     db.add_all(customers)
     db.commit()
@@ -41,7 +41,7 @@ def seed():
         models.Notification(type="Inventory", title="Low Stock Alert: 27-inch 4K Monitor", message="Inventory has dropped to 8 units. Threshold is 15."),
         models.Notification(type="Inventory", title="Critical Stock: Wireless Mouse", message="Inventory has dropped to 2 units. Threshold is 10."),
         models.Notification(type="System", title="System Update Completed", message="Backend API successfully updated to v2.1.0"),
-        models.Notification(type="Orders", title="Large Order Received", message="Customer Bob Smith just placed an order totaling ₹1,496.00"),
+        models.Notification(type="Orders", title="Large Order Received", message="Customer Rahul Sharma just placed an order totaling ₹1,496.00"),
     ]
     db.add_all(notifications)
     db.commit()

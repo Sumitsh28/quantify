@@ -60,3 +60,18 @@ def test_delete_customer_with_orders(client):
     # Try deleting customer
     delete_res = client.delete(f"/api/v1/customers/{customer_id}")
     assert delete_res.status_code == 400
+
+def test_create_customer_duplicate_email(client):
+    # Requirement: Customer email must be unique
+    client.post("/api/v1/customers", json={
+        "full_name": "Unique Customer",
+        "email": "unique@example.com"
+    })
+    
+    res2 = client.post("/api/v1/customers", json={
+        "full_name": "Another Customer",
+        "email": "unique@example.com"
+    })
+    
+    assert res2.status_code == 409
+    assert "already exists" in res2.json()["detail"].lower()
