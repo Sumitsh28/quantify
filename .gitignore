@@ -61,3 +61,13 @@ Icon
 # Docker
 .dockerignore
 docker-compose.override.yml
+
+# Testing / Coverage
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+coverage.xml
+*.lcov
