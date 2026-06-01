@@ -1,12 +1,12 @@
 # Quantify Inventory Management System
 
-Quantify is a premium, highly-responsive Inventory Management System built to handle products, customers, and orders with a sleek and modern User Interface. This end-to-end system allows users to seamlessly manage stock levels, track critical low-stock alerts, and efficiently handle checkout flows.
+Quantify is a premium, highly responsive Inventory Management System built to handle products, customers, and orders with a sleek and modern User Interface. This end to end system allows users to seamlessly manage stock levels, track critical low stock alerts, and efficiently handle checkout flows.
 
 ## 🌟 Key Features & Design Decisions
 
 ### 1. **Premium & Dynamic User Interface**
 - **Decision:** We implemented a tailored Design System (using custom RGB variables for precise opacity controls), moving away from generic default styles.
-- **Why:** To make the application feel like a state-of-the-art enterprise tool. We employed glassmorphism, smooth micro-animations (`framer-motion`), and rich color tokens (Tailwind CSS) to create an engaging experience.
+- **Why:** To make the application feel like a state of the art enterprise tool. We employed glassmorphism, smooth micro-animations (`framer-motion`), and rich color tokens (Tailwind CSS) to create an engaging experience.
 - **Outcome:** The UI smoothly transitions between Light and Dark modes without a single page reload, and responds fluidly to desktop and mobile layouts.
 
 ### 2. **Scalable Architecture & Caching**
@@ -22,7 +22,7 @@ Quantify is a premium, highly-responsive Inventory Management System built to ha
 - **Why:** Because reliability is paramount in inventory systems. We ensured all major API endpoints and critical UI components are thoroughly covered by functional unit/integration tests (Hitting >= 75% coverage).
 
 ### 5. **Concurrency and Data Integrity**
-- **Optimistic Concurrency Control (OCC):** Replaced bottlenecks of row-level locking with a `version` column. We execute atomic `UPDATE ... WHERE id = Y AND version = Z` statements for inventory reduction. If `rowcount == 0`, we raise a `409 Conflict`, seamlessly handling flash-sale race conditions.
+- **Optimistic Concurrency Control (OCC):** Replaced bottlenecks of row level locking with a `version` column. We execute atomic `UPDATE ... WHERE id = Y AND version = Z` statements for inventory reduction. If `rowcount == 0`, we raise a `409 Conflict`, seamlessly handling flash-sale race conditions.
 - **Database Transactions (ACID):** Order creation and inventory decrements are wrapped in atomic SQLAlchemy transactions. Any failure instantly rolls back the order.
 - **Idempotency Keys:** Implemented via the `Idempotency-Key` header on `POST /orders` to prevent double-billing from network retries.
 - **Database Migrations:** Configured `Alembic` for production-safe database schema evolutions.
@@ -94,17 +94,12 @@ graph TD
 ### Application UI
 | Light Mode | Dark Mode |
 | :---: | :---: |
-| ![Dashboard Light Placeholder](<PLACEHOLDER_FOR_DASHBOARD_LIGHT_IMAGE>) | ![Dashboard Dark Placeholder](<PLACEHOLDER_FOR_DASHBOARD_DARK_IMAGE>) |
-| ![Products Light Placeholder](<PLACEHOLDER_FOR_PRODUCTS_LIGHT_IMAGE>) | ![Products Dark Placeholder](<PLACEHOLDER_FOR_PRODUCTS_DARK_IMAGE>) |
-| ![Customers Light Placeholder](<PLACEHOLDER_FOR_CUSTOMERS_LIGHT_IMAGE>) | ![Customers Dark Placeholder](<PLACEHOLDER_FOR_CUSTOMERS_DARK_IMAGE>) |
-| ![Orders Light Placeholder](<PLACEHOLDER_FOR_ORDERS_LIGHT_IMAGE>) | ![Orders Dark Placeholder](<PLACEHOLDER_FOR_ORDERS_DARK_IMAGE>) |
-| ![Product Modal Light Placeholder](<PLACEHOLDER_FOR_PRODUCT_MODAL_LIGHT_IMAGE>) | ![Product Modal Dark Placeholder](<PLACEHOLDER_FOR_PRODUCT_MODAL_DARK_IMAGE>) |
-| ![Order Modal Light Placeholder](<PLACEHOLDER_FOR_ORDER_MODAL_LIGHT_IMAGE>) | ![Order Modal Dark Placeholder](<PLACEHOLDER_FOR_ORDER_MODAL_DARK_IMAGE>) |
+| ![Dashboard Light](https://github.com/user-attachments/assets/d00845bd-d2a5-4d45-b2c3-88a0d671a63c) | ![Dashboard Dark](https://github.com/user-attachments/assets/864a1169-9f2a-4a6e-8177-31a90dee2eee) |
+| ![Products Light](https://github.com/user-attachments/assets/1c3e367c-bc0c-44e4-8045-b0f0d1ed688f) | ![Products Dark](https://github.com/user-attachments/assets/2e2e7e9b-ac18-4174-98cf-25796fc8f707) |
+| ![Customers Light](https://github.com/user-attachments/assets/5f769a6f-9233-4d8f-b302-7fd2153ec8f1) | ![Customers Dark](https://github.com/user-attachments/assets/4a0d5a13-0df4-4888-b86c-1798532f7b30) |
+| ![Orders Light](https://github.com/user-attachments/assets/b0ea08c7-a201-4dc5-b9b7-08bf0dbd1fa9) | ![Orders Dark](https://github.com/user-attachments/assets/4d8e4a75-1b91-4764-95f0-0e0fb1e1baf5) |
+| ![Order Modal Light](https://github.com/user-attachments/assets/7ffd6313-5b59-497d-934f-de5aa8ad7553) | ![Order Modal Dark](https://github.com/user-attachments/assets/b35b94c7-c5d4-4800-9107-45fbea760ca7) |
 
-### Test Coverage
-| Backend (Pytest) | Frontend (Vitest) |
-| :---: | :---: |
-| ![Backend Coverage Placeholder](<PLACEHOLDER_FOR_BACKEND_COVERAGE_IMAGE>) | ![Frontend Coverage Placeholder](<PLACEHOLDER_FOR_FRONTEND_COVERAGE_IMAGE>) |
 
 ---
 
@@ -113,11 +108,9 @@ graph TD
 ### 1. Clone the Repository
 Start by cloning the project to your local machine:
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/Sumitsh28/quantify.git
+cd quantify
 ```
-> **Output:** Clones the repository locally.
-![Git Clone Output Placeholder](<PLACEHOLDER_FOR_GIT_CLONE_IMAGE>)
 
 ---
 
@@ -149,14 +142,12 @@ The entire stack is containerized. To run the application via Docker:
    docker-compose up --build -d
    ```
    > **Output:** Docker will pull the necessary Python and Node images, install all dependencies, build the frontend Vite app, and boot up both the FastAPI backend and the Vite dev server.
-   ![Docker Build Output Placeholder](<PLACEHOLDER_FOR_DOCKER_BUILD_IMAGE>)
 
 2. **Verify the Services are Running**
    ```bash
    docker-compose ps
    ```
    > **Output:** Shows `quantify-frontend` (Port 5173) and `quantify-backend` (Port 8080) as `Up`.
-   ![Docker PS Output Placeholder](<PLACEHOLDER_FOR_DOCKER_PS_IMAGE>)
 
 3. **Run the Automated Tests via Docker**
    **Backend:**
@@ -196,7 +187,6 @@ pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 > **Output:** The FastAPI server boots up on `http://localhost:8080`.
-![Uvicorn Output Placeholder](<PLACEHOLDER_FOR_UVICORN_OUTPUT_IMAGE>)
 
 **Run Backend Tests:**
 Ensure you are in the `backend` directory with your virtual environment activated:
@@ -220,14 +210,12 @@ npm install
 npm run dev
 ```
 > **Output:** The Vite server starts on `http://localhost:5173`.
-![Vite Output Placeholder](<PLACEHOLDER_FOR_VITE_OUTPUT_IMAGE>)
 
 **Run Frontend Tests:**
 ```bash
 npx vitest run --coverage
 ```
 > **Output:** Runs Vitest across all components and prints an Istanbul coverage table.
-![Vitest Output Placeholder](<PLACEHOLDER_FOR_VITEST_OUTPUT_IMAGE>)
 
 ---
 
