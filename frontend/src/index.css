@@ -5,8 +5,68 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: #f8fafc;
+    --on-background: #0f172a;
+    
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #f8fafc;
+    --surface-container: #f1f5f9;
+    --surface-container-high: #e2e8f0;
+    --surface-container-highest: #cbd5e1;
+    
+    --on-surface: #0f172a;
+    --on-surface-variant: #475569;
+    
+    --inverse-surface: #1e293b;
+    --inverse-on-surface: #f8fafc;
+    
+    --outline: #94a3b8;
+    --outline-variant: #cbd5e1;
+    
+    --primary: #494bd6;
+    --on-primary: #ffffff;
+    --inverse-primary: #494bd6;
+    
+    --error: #ef4444;
+    --error-container: #fee2e2;
+    
+    --secondary: #0ea5e9;
+    --secondary-fixed-dim: #0284c7;
+  }
+
+  .dark {
+    --background: #13131b;
+    --on-background: #e4e1ed;
+    
+    --surface-container-lowest: #0d0d15;
+    --surface-container-low: #1b1b23;
+    --surface-container: #1f1f27;
+    --surface-container-high: #292932;
+    --surface-container-highest: #34343d;
+    
+    --on-surface: #e4e1ed;
+    --on-surface-variant: #c7c4d7;
+    
+    --inverse-surface: #e4e1ed;
+    --inverse-on-surface: #303038;
+    
+    --outline: #908fa0;
+    --outline-variant: #464554;
+    
+    --primary: #c0c1ff;
+    --on-primary: #1000a9;
+    --inverse-primary: #494bd6;
+    
+    --error: #ffb4ab;
+    --error-container: #93000a;
+    
+    --secondary: #89ceff;
+    --secondary-fixed-dim: #89ceff;
+  }
+
   body {
-    @apply bg-background text-on-background font-sans antialiased;
+    @apply bg-background text-on-background font-sans antialiased transition-colors duration-200;
   }
 }
 
@@ -47,7 +107,7 @@
   .input-field {
     @apply bg-surface-container-low border border-outline-variant rounded px-3 py-2 text-on-surface text-sm w-full
            transition-all focus:outline-none focus:ring-2 focus:ring-inverse-primary focus:border-transparent
-           placeholder:text-on-surface-variant/50;
+           placeholder:text-on-surface-variant;
   }
   
   .input-error {

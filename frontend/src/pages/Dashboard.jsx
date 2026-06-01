@@ -76,7 +76,8 @@ const Dashboard = () => {
           </Link>
         </div>
         
-        <table className="w-full text-left border-collapse">
+        {/* Desktop Table */}
+        <table className="w-full text-left border-collapse hidden md:table">
           <thead>
             <tr className="border-b border-outline-variant/30 text-on-surface-variant text-xs uppercase tracking-wider font-semibold bg-surface-container/50">
               <th className="px-5 py-3">Product Name</th>
@@ -93,7 +94,7 @@ const Dashboard = () => {
               lowStockProducts.map(product => {
                 const isCritical = product.quantity_in_stock <= (product.threshold || 10) / 2;
                 return (
-                <tr key={product.id} className="border-b border-outline-variant/20 hover:bg-white/5 transition-colors">
+                <tr key={product.id} className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors">
                   <td className="px-5 py-4 font-medium text-on-surface">{product.name}</td>
                   <td className="px-5 py-4 text-on-surface-variant text-sm">{product.sku}</td>
                   <td className={`px-5 py-4 text-right font-bold tnum ${isCritical ? 'text-error' : 'text-tertiary'}`}>
@@ -115,6 +116,42 @@ const Dashboard = () => {
             )}
           </tbody>
         </table>
+
+        {/* Mobile Cards */}
+        <div className="block md:hidden divide-y divide-outline-variant/30">
+            {lowStockProducts.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant">No low stock items.</div>
+            ) : (
+              lowStockProducts.map(product => {
+                const isCritical = product.quantity_in_stock <= (product.threshold || 10) / 2;
+                return (
+                  <div key={product.id} className="p-4 hover:bg-surface-variant/30 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-medium text-on-surface leading-snug mb-0.5">{product.name}</div>
+                        <div className="text-xs text-on-surface-variant">{product.sku}</div>
+                      </div>
+                      <span className={`inline-flex shrink-0 items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${
+                        isCritical 
+                          ? 'bg-error-container/20 text-error border-error/30' 
+                          : 'bg-tertiary-container/20 text-tertiary border-tertiary/30'
+                      }`}>
+                        {isCritical ? 'CRITICAL' : 'WARNING'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-3 mt-3 border-t border-outline-variant/20">
+                      <div className="text-xs text-on-surface-variant">
+                        Threshold: <span className="tnum">{product.threshold || 10}</span>
+                      </div>
+                      <div className="text-sm font-medium">
+                        Current Stock: <span className={`tnum font-bold ${isCritical ? 'text-error' : 'text-tertiary'}`}>{product.quantity_in_stock}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+        </div>
       </div>
     </div>
   );

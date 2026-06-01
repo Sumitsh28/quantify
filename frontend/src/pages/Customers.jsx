@@ -37,43 +37,45 @@ const CustomerModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
-      <div className="glass w-full max-w-md rounded-xl p-6 shadow-2xl scale-in-center">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Add Customer</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition"><X size={20} /></button>
+    <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
+      <div className="surface-elevated w-full max-w-md rounded-lg shadow-2xl scale-in-center">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-outline-variant/30 shrink-0">
+          <h2 className="headline-md text-on-surface">Add Customer</h2>
+          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition"><X size={20} /></button>
         </div>
         
-        <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-300">Full Name</label>
-            <div className="relative">
-                <User size={18} className="absolute left-3 top-2.5 text-gray-500" />
-                <input {...register('full_name')} className="w-full bg-black/40 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:border-blue-500 outline-none transition" placeholder="John Doe" />
+        <div className="p-6">
+            <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="flex flex-col gap-4">
+            <div>
+                <label className="block label-md text-on-surface-variant mb-1">Full Name <span className="text-error">*</span></label>
+                <div className="relative">
+                    <User size={18} className="absolute left-3 top-2.5 text-on-surface-variant" />
+                    <input {...register('full_name')} className="input-field pl-10" placeholder="John Doe" />
+                </div>
+                {errors.full_name && <span className="text-error text-xs mt-1 block">{errors.full_name.message}</span>}
             </div>
-            {errors.full_name && <span className="text-red-400 text-xs">{errors.full_name.message}</span>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-300">Email</label>
-            <div className="relative">
-                <Mail size={18} className="absolute left-3 top-2.5 text-gray-500" />
-                <input type="email" {...register('email')} className="w-full bg-black/40 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:border-blue-500 outline-none transition" placeholder="john@example.com" />
+            <div>
+                <label className="block label-md text-on-surface-variant mb-1">Email <span className="text-error">*</span></label>
+                <div className="relative">
+                    <Mail size={18} className="absolute left-3 top-2.5 text-on-surface-variant" />
+                    <input type="email" {...register('email')} className="input-field pl-10" placeholder="john@example.com" />
+                </div>
+                {errors.email && <span className="text-error text-xs mt-1 block">{errors.email.message}</span>}
             </div>
-            {errors.email && <span className="text-red-400 text-xs">{errors.email.message}</span>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-300">Phone (Optional)</label>
-            <input {...register('phone')} className="w-full bg-black/40 border border-white/10 rounded-lg p-2 focus:border-blue-500 outline-none transition" placeholder="+1 555 000 0000" />
-          </div>
-          
-          <div className="mt-6 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-gray-300 hover:bg-white/10 transition">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition disabled:opacity-50 flex items-center gap-2">
-              {isSubmitting && <Activity size={16} className="animate-spin" />}
-              Create Customer
-            </button>
-          </div>
-        </form>
+            <div>
+                <label className="block label-md text-on-surface-variant mb-1">Phone (Optional)</label>
+                <input {...register('phone')} className="input-field" placeholder="+1 555 000 0000" />
+            </div>
+            
+            <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-outline-variant/30">
+                <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary flex items-center gap-2">
+                {isSubmitting && <Activity size={16} className="animate-spin" />}
+                Create Customer
+                </button>
+            </div>
+            </form>
+        </div>
       </div>
     </div>
   );
@@ -94,7 +96,7 @@ const Customers = () => {
     },
     onError: (err, id, context) => {
       queryClient.setQueryData(['customers'], context.previous);
-      toast.error('Failed to delete customer');
+      toast.error(err.response?.data?.detail || 'Failed to delete customer');
     },
     onSettled: () => {
       queryClient.invalidateQueries(['customers']);
@@ -104,53 +106,87 @@ const Customers = () => {
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       deleteMutation.mutate(id);
-      toast.success('Customer deleted optimistically');
     }
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Customers</h1>
-        <button onClick={() => setIsModalOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
-          <Plus size={20} /> Add Customer
+    <div className="max-w-[1200px] mx-auto animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <div>
+            <h1 className="headline-lg text-on-surface">Customers</h1>
+            <p className="text-on-surface-variant text-sm mt-1">Manage your customer relationships.</p>
+        </div>
+        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 justify-center w-full sm:w-auto">
+          <Plus size={18} /> Add Customer
         </button>
       </div>
 
-      <div className="glass rounded-xl overflow-hidden">
-        <table className="w-full text-left border-collapse">
+      <div className="surface-low rounded-lg border border-outline-variant flex flex-col">
+        {/* Desktop Table */}
+        <table className="w-full text-left border-collapse hidden md:table">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10 text-gray-300">
-              <th className="p-4 font-medium">Name</th>
-              <th className="p-4 font-medium">Email</th>
-              <th className="p-4 font-medium">Phone</th>
-              <th className="p-4 font-medium text-right">Actions</th>
+            <tr className="border-b border-outline-variant/30 text-on-surface-variant text-xs font-medium bg-surface-container/50">
+              <th className="px-5 py-4">Name</th>
+              <th className="px-5 py-4">Email</th>
+              <th className="px-5 py-4">Phone</th>
+              <th className="px-5 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan="4" className="p-8 text-center text-gray-400">Loading customers...</td></tr>
+              <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">Loading customers...</td></tr>
             ) : customers?.length === 0 ? (
-              <tr><td colSpan="4" className="p-8 text-center text-gray-400">No customers found. Add one above.</td></tr>
+              <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">No customers found. Add one above.</td></tr>
             ) : (
               customers?.map(customer => (
-                <tr key={customer.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                  <td className="p-4 font-medium flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                <tr key={customer.id} className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors">
+                  <td className="px-5 py-4 font-medium flex items-center gap-3 text-on-surface">
+                    <div className="w-8 h-8 rounded-full bg-secondary-fixed-dim/20 text-secondary flex items-center justify-center font-bold">
                         {customer.full_name.charAt(0)}
                     </div>
                     {customer.full_name}
                   </td>
-                  <td className="p-4 text-gray-300">{customer.email}</td>
-                  <td className="p-4 text-gray-300">{customer.phone || '-'}</td>
-                  <td className="p-4 flex justify-end gap-2">
-                    <button onClick={() => handleDelete(customer.id)} className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition"><Trash2 size={18} /></button>
+                  <td className="px-5 py-4 text-on-surface-variant">{customer.email}</td>
+                  <td className="px-5 py-4 text-on-surface-variant">{customer.phone || '-'}</td>
+                  <td className="px-5 py-4 flex justify-end gap-2">
+                    <button onClick={() => handleDelete(customer.id)} className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded transition-colors"><Trash2 size={18} /></button>
                   </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+
+        {/* Mobile Cards */}
+        <div className="block md:hidden divide-y divide-outline-variant/30">
+            {isLoading ? (
+              <div className="p-6 text-center text-on-surface-variant">Loading customers...</div>
+            ) : customers?.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant">No customers found. Add one above.</div>
+            ) : (
+              customers?.map(customer => (
+                <div key={customer.id} className="p-4 hover:bg-surface-variant/30 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-secondary-fixed-dim/20 text-secondary flex items-center justify-center font-bold shrink-0">
+                            {customer.full_name.charAt(0)}
+                        </div>
+                        <div>
+                            <div className="font-medium text-on-surface text-sm">{customer.full_name}</div>
+                            <div className="text-xs text-on-surface-variant">{customer.email}</div>
+                        </div>
+                    </div>
+                    <button onClick={() => handleDelete(customer.id)} className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded transition-colors"><Trash2 size={16} /></button>
+                  </div>
+                  {customer.phone && (
+                    <div className="text-xs text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/20">
+                        Phone: <span className="tnum text-on-surface">{customer.phone}</span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+        </div>
       </div>
 
       <CustomerModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

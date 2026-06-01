@@ -211,7 +211,8 @@ const Products = () => {
       </div>
 
       <div className="surface-low rounded-lg border border-outline-variant flex flex-col">
-        <table className="w-full text-left border-collapse">
+        {/* Desktop Table */}
+        <table className="w-full text-left border-collapse hidden md:table">
           <thead>
             <tr className="border-b border-outline-variant/30 text-on-surface-variant text-xs font-medium bg-surface-container/50">
               <th className="px-5 py-4">Product Details</th>
@@ -229,9 +230,9 @@ const Products = () => {
               <tr><td colSpan="6" className="p-8 text-center text-on-surface-variant">No products found.</td></tr>
             ) : (
               products?.map(product => (
-                <tr key={product.id} className="border-b border-outline-variant/20 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>
+                <tr key={product.id} className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors cursor-pointer" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>
                   <td className="px-5 py-4 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+                    <div className="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant shrink-0">
                         <Laptop size={20} />
                     </div>
                     <div>
@@ -253,6 +254,40 @@ const Products = () => {
             )}
           </tbody>
         </table>
+
+        {/* Mobile Cards */}
+        <div className="block md:hidden divide-y divide-outline-variant/30">
+          {isLoading ? (
+            <div className="p-6 text-center text-on-surface-variant">Loading products...</div>
+          ) : products?.length === 0 ? (
+            <div className="p-6 text-center text-on-surface-variant">No products found.</div>
+          ) : (
+            products?.map(product => (
+              <div key={product.id} onClick={() => { setEditingProduct(product); setIsModalOpen(true); }} className="p-4 hover:bg-surface-variant/30 transition-colors cursor-pointer active:bg-surface-variant/50">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant shrink-0">
+                      <Laptop size={20} />
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm text-on-surface leading-snug mb-0.5">{product.name}</div>
+                      <div className="text-xs text-on-surface-variant">{product.sku} • {product.category || 'N/A'}</div>
+                    </div>
+                  </div>
+                  <div className="shrink-0">{getStatusBadge(product.quantity_in_stock, product.threshold)}</div>
+                </div>
+                <div className="flex justify-between items-center mt-3 pt-3 border-t border-outline-variant/20">
+                  <div className="text-xs text-on-surface-variant">
+                    Stock: <span className={`font-medium tnum ${product.quantity_in_stock <= (product.threshold || 10) ? 'text-error' : 'text-on-surface'}`}>{product.quantity_in_stock}</span>
+                  </div>
+                  <div className="text-sm font-medium tnum text-on-surface">
+                    ₹{product.price.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
         
         <div className="p-4 border-t border-outline-variant/30 flex items-center justify-between text-sm text-on-surface-variant bg-surface-container/30">
             <span>Showing {products?.length ? `1-${products.length}` : '0'} of {products?.length || 0} products</span>

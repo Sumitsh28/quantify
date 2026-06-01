@@ -21,7 +21,8 @@ const Orders = () => {
 
       <div className="surface-low rounded-lg border border-outline-variant flex flex-col flex-1 min-h-0">
         <div className="flex-1 overflow-auto">
-          <table className="w-full text-left border-collapse relative">
+          {/* Desktop Table */}
+          <table className="w-full text-left border-collapse relative hidden md:table">
             <thead className="sticky top-0 z-10 bg-surface-container/95 backdrop-blur-sm shadow-sm">
               <tr className="border-b border-outline-variant/30 text-on-surface-variant text-xs font-medium uppercase tracking-wider">
                 <th className="px-5 py-4">Order ID</th>
@@ -38,7 +39,7 @@ const Orders = () => {
                 <tr><td colSpan="5" className="p-8 text-center text-on-surface-variant">No orders found. Create one above.</td></tr>
               ) : (
                 orders?.map(order => (
-                  <tr key={order.id} className="border-b border-outline-variant/20 hover:bg-white/5 transition-colors">
+                  <tr key={order.id} className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors">
                     <td className="px-5 py-4 font-medium tnum text-sm text-on-surface flex items-center gap-2">
                         <ShoppingCart size={16} className="text-inverse-primary"/>
                         #{order.id}
@@ -56,6 +57,36 @@ const Orders = () => {
               )}
             </tbody>
           </table>
+
+          {/* Mobile Cards */}
+          <div className="block md:hidden divide-y divide-outline-variant/30">
+            {isLoading ? (
+              <div className="p-6 text-center text-on-surface-variant">Loading orders...</div>
+            ) : orders?.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant">No orders found.</div>
+            ) : (
+              orders?.map(order => (
+                <div key={order.id} className="p-4 hover:bg-surface-variant/30 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2 font-medium tnum text-sm text-on-surface">
+                      <ShoppingCart size={16} className="text-inverse-primary"/>
+                      #{order.id}
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-secondary-fixed-dim/20 text-secondary border border-secondary/30">
+                      Completed
+                    </span>
+                  </div>
+                  <div className="text-xs text-on-surface-variant mb-3">
+                    Customer {order.customer_id} • {new Date(order.created_at).toLocaleDateString()}
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t border-outline-variant/20">
+                    <span className="text-xs text-on-surface-variant">Total Amount</span>
+                    <span className="text-sm font-medium tnum text-on-surface">₹{order.total_amount.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

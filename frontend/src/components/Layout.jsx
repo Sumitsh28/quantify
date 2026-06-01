@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutGrid, Package, Users, ShoppingCart, Settings, HelpCircle, LogOut, Bell, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutGrid, Package, Users, ShoppingCart, Bell, Plus, ChevronLeft, ChevronRight, Menu, Sun, Moon } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import CreateOrderModal from './CreateOrderModal';
@@ -41,9 +41,23 @@ const Layout = () => {
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
   const location = useLocation();
 
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+
   const getPageTitle = () => {
     switch (location.pathname) {
       case '/': return 'Dashboard';
+      case '/dashboard': return 'Dashboard';
       case '/products': return 'Product Inventory';
       case '/customers': return 'Customers';
       case '/orders': return 'Orders';
@@ -93,51 +107,42 @@ const Layout = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto">
-          <SidebarItem icon={LayoutGrid} label="Dashboard" to="/" end collapsed={isCollapsed} />
+          <SidebarItem icon={LayoutGrid} label="Dashboard" to="/dashboard" collapsed={isCollapsed} />
           <SidebarItem icon={Package} label="Products" to="/products" collapsed={isCollapsed} />
           <SidebarItem icon={Users} label="Customers" to="/customers" collapsed={isCollapsed} />
           <SidebarItem icon={ShoppingCart} label="Orders" to="/orders" collapsed={isCollapsed} />
-          <div className={`flex items-center ${isCollapsed ? 'justify-center mx-2 px-2' : 'gap-3 mx-4 px-4'} py-2.5 my-1 rounded text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors cursor-pointer`}>
-            <Settings size={18} className="shrink-0" />
-            {!isCollapsed && <span>Settings</span>}
-          </div>
         </nav>
-
-        <div className="p-4 border-t border-outline-variant/30 mt-auto flex flex-col gap-1">
-          <div className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'} py-2.5 rounded text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors cursor-pointer`} title="Support">
-            <HelpCircle size={18} />
-            {!isCollapsed && <span>Support</span>}
-          </div>
-          <div className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'} py-2.5 rounded text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors cursor-pointer`} title="Logout">
-            <LogOut size={18} />
-            {!isCollapsed && <span>Logout</span>}
-          </div>
-        </div>
       </motion.aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden bg-background relative">
         {/* Topbar */}
-        <header className="h-[64px] border-b border-outline-variant/30 flex items-center justify-between px-8 bg-surface-container-lowest shrink-0">
-          <div className="flex items-center gap-8 h-full">
+        <header className="h-[64px] border-b border-outline-variant/30 flex items-center justify-between px-4 sm:px-8 bg-surface-container-lowest shrink-0">
+          <div className="flex items-center gap-4 sm:gap-8 h-full">
+            <button onClick={() => setIsCollapsed(!isCollapsed)} className="p-2 -ml-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-full hover:bg-surface-variant/50">
+                <Menu size={20} />
+            </button>
             <div className="flex items-center h-full border-b-2 border-inverse-primary text-on-surface font-medium text-sm px-1 cursor-default">
               {getPageTitle()}
             </div>
           </div>
           
-          <div className="flex items-center gap-5 text-on-surface-variant">
-            <NavLink to="/notifications" className={({ isActive }) => `relative transition-colors ${isActive ? 'text-inverse-primary' : 'hover:text-on-surface'}`}>
+          <div className="flex items-center gap-2 sm:gap-4 text-on-surface-variant">
+            <button onClick={toggleTheme} className="p-2 rounded-full transition-colors hover:text-on-surface hover:bg-surface-variant/50">
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <NavLink to="/notifications" className={({ isActive }) => `relative p-2 rounded-full transition-colors ${isActive ? 'text-inverse-primary bg-surface-variant/30' : 'hover:text-on-surface hover:bg-surface-variant/50'}`}>
               <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
             </NavLink>
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-2">
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-1 sm:ml-2">
               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=494bd6" alt="User" />
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-8 relative">
+        <div className="flex-1 overflow-auto p-4 sm:p-8 relative">
           <AnimatePresence mode="wait">
             <motion.div
                 key={location.pathname}
@@ -155,7 +160,7 @@ const Layout = () => {
       
       <CreateOrderModal isOpen={isOrderModalOpen} onClose={() => setOrderModalOpen(false)} />
 
-      <Toaster theme="dark" toastOptions={{
+      <Toaster theme="dark" position="top-right" richColors toastOptions={{
         className: 'bg-surface-container-high border-outline-variant text-on-surface',
       }} />
     </div>
