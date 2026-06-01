@@ -64,3 +64,15 @@ def health_check():
         db_status = "disconnected"
         
     return {"status": "ok", "db": db_status}
+
+@app.get("/api/v1/dashboard", tags=["Dashboard"])
+def get_dashboard_metrics():
+    try:
+        with SessionLocal() as db:
+            result = db.execute(text("SELECT * FROM dashboard_metrics")).first()
+            if result:
+                return dict(result._mapping)
+            return {"total_products": 0, "total_customers": 0, "total_orders": 0, "low_stock_count": 0}
+    except Exception as e:
+        logger.error(f"Error fetching dashboard metrics: {e}")
+        return {"total_products": 0, "total_customers": 0, "total_orders": 0, "low_stock_count": 0}
