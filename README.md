@@ -2,6 +2,13 @@
 
 Quantify is a premium, highly responsive Inventory Management System built to handle products, customers, and orders with a sleek and modern User Interface. This end to end system allows users to seamlessly manage stock levels, track critical low stock alerts, and efficiently handle checkout flows.
 
+## 🌐 Deployed Application URLs
+- **Frontend Application (Vercel):** [https://quantify-lilac.vercel.app/](https://quantify-lilac.vercel.app/)
+- **Backend API Base URL (Railway):** [https://quantify-production-dc5f.up.railway.app](https://quantify-production-dc5f.up.railway.app) (Please use VPN to access the backend because .railway.app might be blocked)
+- **Interactive API Swagger Docs:** [https://quantify-production-dc5f.up.railway.app/docs](https://quantify-production-dc5f.up.railway.app/docs)
+
+---
+
 ## 🌟 Key Features & Design Decisions
 
 ### 1. **Premium & Dynamic User Interface**
@@ -154,16 +161,16 @@ The entire stack is containerized. To run the application via Docker:
    ```bash
    docker exec inventory_backend python -m pytest --cov=. --cov-report=term-missing
    ```
-   ![Pytest Output Placeholder](<img width="676" height="728" alt="Screenshot 2026-06-01 at 3 55 43 PM" src="https://github.com/user-attachments/assets/83afac4f-a5d5-4805-8126-cdc39bac62a1" />
-)
+<img width="676" height="728" alt="Screenshot 2026-06-01 at 3 55 43 PM" src="https://github.com/user-attachments/assets/c4aaf994-f932-4a64-adc3-b840179eaef7" />
+
 
    **Frontend:**
    ```bash
    cd frontend
    npx vitest run --coverage
    ```
-   ![Vitest Output Placeholder](<img width="793" height="449" alt="Screenshot 2026-06-01 at 3 56 11 PM" src="https://github.com/user-attachments/assets/2c6f8656-b0c4-45bc-bc41-e5e1b4f76499" />
-)
+<img width="793" height="449" alt="Screenshot 2026-06-01 at 3 56 11 PM" src="https://github.com/user-attachments/assets/8f63197e-9ed6-436a-b187-d1f38ef81bcb" />
+
 
 ---
 
@@ -247,15 +254,7 @@ As the Quantify platform grows to support tens of thousands of active concurrent
 
 ---
 
-## 🌐 Deployed Application URLs
-Once you deploy the application, you can access the live environments here:
 
-- **Frontend Application (Vercel):** [https://quantify-lilac.vercel.app/](https://quantify-lilac.vercel.app/)
-  Please use VPN to access the backend because .railway.app might be blocked
-- **Backend API Base URL (Railway):** [https://quantify-production-dc5f.up.railway.app](https://quantify-production-dc5f.up.railway.app) 
-- **Interactive API Swagger Docs:** [https://quantify-production-dc5f.up.railway.app/docs](https://quantify-production-dc5f.up.railway.app/docs)
-
----
 
 ## 📖 API Documentation & Postman Collection
 
