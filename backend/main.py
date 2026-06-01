@@ -33,9 +33,20 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down FastAPI application")
     refresh_task.cancel()
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Inventory & Order Management API", version="1.0.0", lifespan=lifespan)
 
-# Add Middleware
+# Add CORS Middleware to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, replace with frontend domains
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add Tracing Middleware
 app.add_middleware(TracingMiddleware)
 
 # Include Routers

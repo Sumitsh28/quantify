@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api/v1',
+  // Use the live Railway backend by default, unless VITE_API_URL is set (for local testing)
+  baseURL: import.meta.env.VITE_API_URL || 'https://quantify-production-dc5f.up.railway.app/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
