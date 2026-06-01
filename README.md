@@ -261,8 +261,8 @@ As the Quantify platform grows to support tens of thousands of active concurrent
 Once you deploy the application, you can access the live environments here:
 
 - **Frontend Application (Vercel/Netlify):** [https://quantify-app.yourdomain.com](https://quantify-app.yourdomain.com) 
-- **Backend API Base URL (Render/AWS/GCP):** [https://api.quantify-app.yourdomain.com](https://api.quantify-app.yourdomain.com) 
-- **Interactive API Swagger Docs:** [https://api.quantify-app.yourdomain.com/docs](https://api.quantify-app.yourdomain.com/docs)
+- **Backend API Base URL (Railway):** [https://quantify-production-dc5f.up.railway.app](https://quantify-production-dc5f.up.railway.app) 
+- **Interactive API Swagger Docs:** [https://quantify-production-dc5f.up.railway.app/docs](https://quantify-production-dc5f.up.railway.app/docs)
 
 ---
 
