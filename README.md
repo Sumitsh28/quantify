@@ -147,12 +147,12 @@ The entire stack is containerized. To run the application via Docker:
    ```bash
    docker-compose ps
    ```
-   > **Output:** Shows `quantify-frontend` (Port 5173) and `quantify-backend` (Port 8080) as `Up`.
+   > **Output:** Shows `inventory_frontend`, `inventory_backend` (Port 8000), and `inventory_nginx` (Port 8080) as `Up`.
 
 3. **Run the Automated Tests via Docker**
    **Backend:**
    ```bash
-   docker exec quantify-backend python -m pytest --cov=app --cov-report=term-missing
+   docker exec inventory_backend python -m pytest --cov=. --cov-report=term-missing
    ```
    ![Pytest Output Placeholder](<PLACEHOLDER_FOR_PYTEST_OUTPUT_IMAGE>)
 
