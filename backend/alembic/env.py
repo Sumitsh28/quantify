@@ -4,6 +4,7 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from sqlalchemy import create_engine
 
 from alembic import context
 
@@ -67,20 +68,22 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     
-    # 1. Grab the raw dictionary from the .ini file
-    ini_section = config.get_section(config.config_ini_section, {})
+    # 1. Force fetch from the environment directly
+    db_url = os.environ.get("DATABASE_URL")
     
-    # 2. FORCE the url into the dictionary to override the .ini file
-    ini_section["sqlalchemy.url"] = os.environ.get(
-        "DATABASE_URL", 
-        "postgresql://postgres:postgres@localhost:5432/inventory_db"
-    )
+    # 2. Crash LOUDLY if Railway didn't inject the variable
+    if not db_url:
+        raise ValueError("🚨 CRITICAL: DATABASE_URL is missing! Railway did not inject the environment variable.")
+    
+    if "localhost" in db_url:
+        print("⚠️ WARNING: DATABASE_URL is evaluating to localhost. Did you commit your .env file?")
 
-    connectable = engine_from_config(
-        ini_section,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # 3. Handle SQLAlchemy 1.4+ dialect rule
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    # 4. Create the engine directly, bypassing alembic.ini completely
+    connectable = create_engine(db_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(
