@@ -6,6 +6,21 @@ Quantify is a premium, highly responsive Inventory Management System built to ha
 - **Frontend Application (Vercel):** [https://quantify-lilac.vercel.app/](https://quantify-lilac.vercel.app/)
 - **Backend API Base URL (Railway):** [https://quantify-production-dc5f.up.railway.app](https://quantify-production-dc5f.up.railway.app) (Please use VPN to access the backend because .railway.app might be blocked)
 - **Interactive API Swagger Docs:** [https://quantify-production-dc5f.up.railway.app/docs](https://quantify-production-dc5f.up.railway.app/docs)
+- **Backend Docker Hub Image:** [https://hub.docker.com/r/sumitsh2801/quantify-backend](https://hub.docker.com/r/sumitsh2801/quantify-backend)
+
+### 🐳 How to Test the Docker Image Locally
+You can easily pull and test the backend Docker image on your own machine. We override the startup command to skip database migrations since the live database is already migrated.
+
+```bash
+# 1. Run the container locally (on port 8001 to avoid conflicts)
+docker run -d --name quantify_test_container -p 8001:8000 --env-file .env sumitsh2801/quantify-backend sh -c "uvicorn main:app --host 0.0.0.0 --port 8000"
+
+# 2. Verify it's working with curl
+curl http://localhost:8001/api/v1/health
+
+# 3. Clean up (Stop and Remove the container)
+docker stop quantify_test_container && docker rm quantify_test_container
+```
 
 ---
 
