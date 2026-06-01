@@ -65,14 +65,19 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    """Run migrations in 'online' mode."""
+    
+    # 1. Grab the raw dictionary from the .ini file
+    ini_section = config.get_section(config.config_ini_section, {})
+    
+    # 2. FORCE the url into the dictionary to override the .ini file
+    ini_section["sqlalchemy.url"] = os.environ.get(
+        "DATABASE_URL", 
+        "postgresql://postgres:postgres@localhost:5432/inventory_db"
+    )
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        ini_section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -84,7 +89,6 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
-
 
 if context.is_offline_mode():
     run_migrations_offline()
