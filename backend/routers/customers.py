@@ -41,6 +41,11 @@ def delete_customer(id: int, db: Session = Depends(get_db)):
     if not customer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
     
+    # Check if customer has existing orders
+    existing_orders = db.query(models.Order).filter(models.Order.customer_id == id).first()
+    if existing_orders:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete customer with existing orders. Please delete their orders first.")
+    
     db.delete(customer)
     db.commit()
     logger.info(f"Customer deleted: {id}")

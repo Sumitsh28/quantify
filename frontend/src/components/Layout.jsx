@@ -1,50 +1,163 @@
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Package, Users, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { LayoutGrid, Package, Users, ShoppingCart, Settings, HelpCircle, LogOut, Bell, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Toaster } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import CreateOrderModal from './CreateOrderModal';
 
-const Sidebar = () => {
-  const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/products', icon: Package, label: 'Products' },
-    { to: '/customers', icon: Users, label: 'Customers' },
-    { to: '/orders', icon: ShoppingCart, label: 'Orders' },
-  ];
-
+const SidebarItem = ({ icon: Icon, label, to, end = false, collapsed }) => {
   return (
-    <aside className="w-64 border-r border-white/10 glass min-h-screen p-4 flex flex-col gap-4">
-      <div className="mb-8 px-2">
-        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-          Antigravity OS
-        </h1>
-      </div>
-      <nav className="flex flex-col gap-2">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-                isActive
-                  ? 'bg-white/10 text-white font-medium'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`
-            }
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `flex items-center ${collapsed ? 'justify-center mx-2 px-2' : 'gap-3 mx-4 px-4'} py-2.5 my-1 rounded text-sm transition-all ${
+          isActive 
+            ? 'bg-inverse-primary/20 text-inverse-primary font-medium' 
+            : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50'
+        }`
+      }
+      title={collapsed ? label : undefined}
+    >
+      <Icon size={18} className="shrink-0" />
+      <AnimatePresence>
+        {!collapsed && (
+          <motion.span
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
+            exit={{ opacity: 0, width: 0 }}
+            className="overflow-hidden whitespace-nowrap"
           >
-            <item.icon size={20} />
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-    </aside>
+            {label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </NavLink>
   );
 };
 
 const Layout = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isOrderModalOpen, setOrderModalOpen] = useState(false);
+  const location = useLocation();
+
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/': return 'Dashboard';
+      case '/products': return 'Product Inventory';
+      case '/customers': return 'Customers';
+      case '/orders': return 'Orders';
+      case '/notifications': return 'Notifications';
+      default: return 'Dashboard';
+    }
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#09090b] text-white">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-y-auto">
-        <Outlet />
+    <div className="flex h-screen bg-background">
+      {/* Sidebar */}
+      <motion.aside 
+        animate={{ width: isCollapsed ? 80 : 240 }}
+        className="flex-shrink-0 border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest overflow-hidden relative"
+      >
+        <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="absolute right-[-12px] top-6 bg-surface-container-highest border border-outline-variant/50 text-on-surface-variant hover:text-on-surface rounded-full p-0.5 z-10 hidden"
+        >
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+
+        <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} mb-1`}>
+            <div className="w-8 h-8 rounded bg-inverse-primary text-white flex items-center justify-center font-bold text-lg shrink-0 cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
+              Q
+            </div>
+            <AnimatePresence>
+                {!isCollapsed && (
+                <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="overflow-hidden whitespace-nowrap"
+                >
+                    <h1 className="text-lg font-bold text-on-surface tracking-tight leading-tight">Quantify</h1>
+                    <p className="text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">Enterprise</p>
+                </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+
+        <div className="px-4 mb-6">
+          <button onClick={() => setOrderModalOpen(true)} className={`btn-primary w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'justify-center gap-2'} py-2.5`}>
+            <Plus size={18} />
+            {!isCollapsed && <span>New Order</span>}
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto">
+          <SidebarItem icon={LayoutGrid} label="Dashboard" to="/" end collapsed={isCollapsed} />
+          <SidebarItem icon={Package} label="Products" to="/products" collapsed={isCollapsed} />
+          <SidebarItem icon={Users} label="Customers" to="/customers" collapsed={isCollapsed} />
+          <SidebarItem icon={ShoppingCart} label="Orders" to="/orders" collapsed={isCollapsed} />
+          <div className={`flex items-center ${isCollapsed ? 'justify-center mx-2 px-2' : 'gap-3 mx-4 px-4'} py-2.5 my-1 rounded text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors cursor-pointer`}>
+            <Settings size={18} className="shrink-0" />
+            {!isCollapsed && <span>Settings</span>}
+          </div>
+        </nav>
+
+        <div className="p-4 border-t border-outline-variant/30 mt-auto flex flex-col gap-1">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'} py-2.5 rounded text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors cursor-pointer`} title="Support">
+            <HelpCircle size={18} />
+            {!isCollapsed && <span>Support</span>}
+          </div>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'} py-2.5 rounded text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors cursor-pointer`} title="Logout">
+            <LogOut size={18} />
+            {!isCollapsed && <span>Logout</span>}
+          </div>
+        </div>
+      </motion.aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-background relative">
+        {/* Topbar */}
+        <header className="h-[64px] border-b border-outline-variant/30 flex items-center justify-between px-8 bg-surface-container-lowest shrink-0">
+          <div className="flex items-center gap-8 h-full">
+            <div className="flex items-center h-full border-b-2 border-inverse-primary text-on-surface font-medium text-sm px-1 cursor-default">
+              {getPageTitle()}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-5 text-on-surface-variant">
+            <NavLink to="/notifications" className={({ isActive }) => `relative transition-colors ${isActive ? 'text-inverse-primary' : 'hover:text-on-surface'}`}>
+              <Bell size={20} />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+            </NavLink>
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-2">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=494bd6" alt="User" />
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-auto p-8 relative">
+          <AnimatePresence mode="wait">
+            <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+            >
+                <Outlet context={{ setOrderModalOpen }} />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
+      
+      <CreateOrderModal isOpen={isOrderModalOpen} onClose={() => setOrderModalOpen(false)} />
+
+      <Toaster theme="dark" toastOptions={{
+        className: 'bg-surface-container-high border-outline-variant text-on-surface',
+      }} />
     </div>
   );
 };

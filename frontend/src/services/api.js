@@ -23,6 +23,9 @@ export const createOrder = async ({ idempotencyKey, data }) =>
   (await api.post('/orders', data, { headers: { 'Idempotency-Key': idempotencyKey } })).data;
 export const deleteOrder = async (id) => await api.delete(`/orders/${id}`);
 
+export const fetchNotifications = async () => (await api.get('/notifications')).data;
+export const markAllNotificationsRead = async () => (await api.post('/notifications/mark-all-read')).data;
+
 export const fetchDashboardMetrics = async () => {
     // We will need to implement this endpoint in the backend. 
     // For now, let's mock it or call it if it exists.

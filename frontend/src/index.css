@@ -1,37 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-
   body {
-    @apply bg-[#09090b] text-white antialiased font-sans;
+    @apply bg-background text-on-background font-sans antialiased;
   }
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+@layer components {
+  /* Surface tiers */
+  .surface-lowest { @apply bg-surface-container-lowest; }
+  .surface-low { @apply bg-surface-container-low border border-outline-variant; }
+  .surface-base { @apply bg-surface-container border border-outline-variant; }
+  .surface-high { @apply bg-surface-container-high border border-outline-variant; }
+  .surface-elevated { 
+    @apply bg-surface-container-highest border border-outline-variant; 
+    box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Typography */
+  .display-lg { @apply text-[36px] font-bold leading-[44px] tracking-[-0.02em]; }
+  .headline-lg { @apply text-[24px] font-semibold leading-[32px] tracking-[-0.01em]; }
+  .headline-md { @apply text-[20px] font-semibold leading-[28px]; }
+  .body-lg { @apply text-[16px] font-normal leading-[24px]; }
+  .body-md { @apply text-[14px] font-normal leading-[20px]; }
+  .body-sm { @apply text-[12px] font-normal leading-[16px]; }
+  .label-md { @apply text-[13px] font-medium leading-[18px] tracking-[0.05em]; }
+  .mono-label { @apply text-[12px] font-medium leading-[16px] tabular-nums; }
+  .tnum { @apply tabular-nums; }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-inverse-primary text-white rounded font-medium px-4 py-2 transition-all duration-200 
+           hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent border border-outline-variant text-on-surface rounded font-medium px-4 py-2 transition-all duration-200
+           hover:bg-white/5 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply bg-surface-container-low border border-outline-variant rounded px-3 py-2 text-on-surface text-sm w-full
+           transition-all focus:outline-none focus:ring-2 focus:ring-inverse-primary focus:border-transparent
+           placeholder:text-on-surface-variant/50;
+  }
+  
+  .input-error {
+    @apply border-error focus:ring-error;
   }
 }

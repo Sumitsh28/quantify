@@ -4,24 +4,36 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { Plus, Edit2, Trash2, X, Activity } from 'lucide-react';
-import { fetchProducts, createProduct, deleteProduct, updateProduct } from '../services/api';
+import { Plus, X, Filter, Download, Laptop, ChevronRight, ChevronLeft } from 'lucide-react';
+import { fetchProducts, createProduct, updateProduct } from '../services/api';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   sku: z.string().min(2, 'SKU is required'),
-  price: z.number().min(0.01, 'Price must be greater than 0'),
-  quantity_in_stock: z.number().int().min(0, 'Quantity cannot be negative'),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  price: z.number().min(0.01, 'Price must be > 0'),
+  quantity_in_stock: z.number().int().min(0, 'Cannot be negative'),
+  threshold: z.number().int().min(0).default(10),
+  supplier_name: z.string().optional(),
+  supplier_part_number: z.string().optional(),
+  visibility_status: z.enum(['Active', 'Draft']).default('Active'),
 });
 
 const ProductModal = ({ isOpen, onClose, product }) => {
   const queryClient = useQueryClient();
   const isEditing = !!product;
   
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, watch, setValue } = useForm({
     resolver: zodResolver(productSchema),
-    defaultValues: product || { name: '', sku: '', price: 0, quantity_in_stock: 0 }
+    defaultValues: product || { 
+        name: '', sku: '', category: '', description: '', 
+        price: 0, quantity_in_stock: 0, threshold: 10,
+        supplier_name: '', supplier_part_number: '', visibility_status: 'Active'
+    }
   });
+
+  const visibility = watch('visibility_status');
 
   const mutation = useMutation({
     mutationFn: isEditing ? updateProduct : createProduct,
@@ -39,45 +51,126 @@ const ProductModal = ({ isOpen, onClose, product }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
-      <div className="glass w-full max-w-md rounded-xl p-6 shadow-2xl scale-in-center">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">{isEditing ? 'Edit Product' : 'Add Product'}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition"><X size={20} /></button>
+    <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
+      <div className="surface-elevated w-full max-w-5xl rounded-lg shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-outline-variant/30 shrink-0">
+          <h2 className="headline-md">{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={onClose} className="btn-secondary px-6">Cancel</button>
+            <button onClick={handleSubmit((data) => mutation.mutate(isEditing ? { id: product.id, ...data } : data))} disabled={isSubmitting} className="btn-primary flex items-center gap-2 px-6">
+              Save Product
+            </button>
+            <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface ml-2"><X size={20}/></button>
+          </div>
         </div>
         
-        <form onSubmit={handleSubmit((data) => mutation.mutate(isEditing ? { id: product.id, ...data } : data))} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-300">Name</label>
-            <input {...register('name')} className="w-full bg-black/40 border border-white/10 rounded-lg p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" />
-            {errors.name && <span className="text-red-400 text-xs">{errors.name.message}</span>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-300">SKU</label>
-            <input {...register('sku')} className="w-full bg-black/40 border border-white/10 rounded-lg p-2 focus:border-blue-500 outline-none transition" />
-            {errors.sku && <span className="text-red-400 text-xs">{errors.sku.message}</span>}
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1 text-gray-300">Price ($)</label>
-              <input type="number" step="0.01" {...register('price', { valueAsNumber: true })} className="w-full bg-black/40 border border-white/10 rounded-lg p-2 focus:border-blue-500 outline-none transition" />
-              {errors.price && <span className="text-red-400 text-xs">{errors.price.message}</span>}
+        <div className="p-6 overflow-y-auto bg-background/50 flex-1">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* General Information */}
+              <div className="surface-low p-6 rounded-lg">
+                <h3 className="headline-md mb-6 text-on-surface">General Information</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block label-md text-on-surface-variant mb-1">Product Name <span className="text-error">*</span></label>
+                    <input {...register('name')} className="input-field" placeholder="e.g. Ergonomic Office Chair" />
+                    {errors.name && <span className="text-error text-xs mt-1 block">{errors.name.message}</span>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">SKU</label>
+                        <input {...register('sku')} className="input-field" placeholder="PRD-001-A" />
+                        {errors.sku && <span className="text-error text-xs mt-1 block">{errors.sku.message}</span>}
+                    </div>
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">Category</label>
+                        <select {...register('category')} className="input-field">
+                            <option value="">Select category...</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Networking">Networking</option>
+                            <option value="Peripherals">Peripherals</option>
+                        </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block label-md text-on-surface-variant mb-1">Description</label>
+                    <textarea {...register('description')} rows={4} className="input-field resize-none" placeholder="Brief description of the product..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              {/* Inventory & Pricing */}
+              <div className="surface-low p-6 rounded-lg">
+                <h3 className="headline-md mb-6 text-on-surface">Inventory & Pricing</h3>
+                <div className="grid grid-cols-3 gap-4">
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">Unit Price</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-2 text-on-surface-variant">₹</span>
+                            <input type="number" step="0.01" {...register('price', { valueAsNumber: true })} className="input-field pl-7" placeholder="0.00" />
+                        </div>
+                        {errors.price && <span className="text-error text-xs mt-1 block">{errors.price.message}</span>}
+                    </div>
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">Initial Stock</label>
+                        <input type="number" {...register('quantity_in_stock', { valueAsNumber: true })} className="input-field" placeholder="0" />
+                        {errors.quantity_in_stock && <span className="text-error text-xs mt-1 block">{errors.quantity_in_stock.message}</span>}
+                    </div>
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">Low Stock Alert</label>
+                        <input type="number" {...register('threshold', { valueAsNumber: true })} className="input-field" placeholder="10" />
+                    </div>
+                </div>
+              </div>
+
+              {/* Supplier Information */}
+              <div className="surface-low p-6 rounded-lg">
+                <h3 className="headline-md mb-6 text-on-surface">Supplier Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">Supplier Name</label>
+                        <select {...register('supplier_name')} className="input-field">
+                            <option value="">Select supplier...</option>
+                            <option value="Nexus Corp">Nexus Corp</option>
+                            <option value="TechSupply Inc">TechSupply Inc</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block label-md text-on-surface-variant mb-1">Supplier Part Number</label>
+                        <input {...register('supplier_part_number')} className="input-field" placeholder="Optional" />
+                    </div>
+                </div>
+              </div>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1 text-gray-300">Stock</label>
-              <input type="number" {...register('quantity_in_stock', { valueAsNumber: true })} className="w-full bg-black/40 border border-white/10 rounded-lg p-2 focus:border-blue-500 outline-none transition" />
-              {errors.quantity_in_stock && <span className="text-red-400 text-xs">{errors.quantity_in_stock.message}</span>}
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Visibility Status */}
+              <div className="surface-low p-6 rounded-lg">
+                <h3 className="headline-md mb-6 text-on-surface">Visibility Status</h3>
+                <div className="space-y-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input type="radio" value="Active" {...register('visibility_status')} className="mt-1 w-4 h-4 text-primary bg-surface-container-highest border-outline-variant focus:ring-primary focus:ring-offset-background" />
+                        <div>
+                            <div className="text-sm font-medium text-on-surface">Active</div>
+                            <div className="text-xs text-on-surface-variant">Product will be immediately available.</div>
+                        </div>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input type="radio" value="Draft" {...register('visibility_status')} className="mt-1 w-4 h-4 text-primary bg-surface-container-highest border-outline-variant focus:ring-primary focus:ring-offset-background" />
+                        <div>
+                            <div className="text-sm font-medium text-on-surface">Draft</div>
+                            <div className="text-xs text-on-surface-variant">Save as draft to complete later.</div>
+                        </div>
+                    </label>
+                </div>
+              </div>
             </div>
+
           </div>
-          
-          <div className="mt-6 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-gray-300 hover:bg-white/10 transition">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition disabled:opacity-50 flex items-center gap-2">
-              {isSubmitting && <Activity size={16} className="animate-spin" />}
-              {isEditing ? 'Save Changes' : 'Create Product'}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );
@@ -88,88 +181,85 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   
   const { data: products, isLoading } = useQuery({ queryKey: ['products'], queryFn: fetchProducts });
-  const queryClient = useQueryClient();
-  
-  const deleteMutation = useMutation({
-    mutationFn: deleteProduct,
-    // Optimistic UI update
-    onMutate: async (id) => {
-      await queryClient.cancelQueries(['products']);
-      const previousProducts = queryClient.getQueryData(['products']);
-      queryClient.setQueryData(['products'], old => old?.filter(p => p.id !== id));
-      return { previousProducts };
-    },
-    onError: (err, id, context) => {
-      queryClient.setQueryData(['products'], context.previousProducts);
-      toast.error('Failed to delete product');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(['products']);
-    }
-  });
-
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteMutation.mutate(id);
-      toast.success('Product deleted optimistically');
-    }
-  };
-
-  const openEdit = (product) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
-  };
 
   const openCreate = () => {
     setEditingProduct(null);
     setIsModalOpen(true);
   };
 
+  const getStatusBadge = (qty, threshold) => {
+    if (qty === 0) return <span className="px-3 py-1 rounded-full text-xs font-medium bg-surface-variant text-on-surface-variant border border-outline-variant/50">Out of Stock</span>;
+    if (qty <= (threshold || 10)) return <span className="px-3 py-1 rounded-full text-xs font-medium bg-error-container/20 text-error border border-error/30">Low Stock</span>;
+    return <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary-fixed-dim/20 text-secondary border border-secondary/30">In Stock</span>;
+  };
+
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Products</h1>
-        <button onClick={openCreate} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-lg shadow-blue-500/20">
-          <Plus size={20} /> Add Product
-        </button>
+    <div className="max-w-[1200px] mx-auto animate-in fade-in duration-500">
+      <div className="flex flex-col gap-2 mb-8">
+        <h1 className="headline-lg">Product Inventory</h1>
+        <p className="text-on-surface-variant text-sm">Manage your catalog, stock levels, and pricing.</p>
       </div>
 
-      <div className="glass rounded-xl overflow-hidden">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex-1 max-w-md relative">
+        </div>
+        <div className="flex items-center gap-3">
+            <button onClick={openCreate} className="btn-primary flex items-center gap-2 px-4 py-1.5 text-sm">
+                <Plus size={16} /> New Product
+            </button>
+        </div>
+      </div>
+
+      <div className="surface-low rounded-lg border border-outline-variant flex flex-col">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10 text-gray-300">
-              <th className="p-4 font-medium">SKU</th>
-              <th className="p-4 font-medium">Name</th>
-              <th className="p-4 font-medium">Price</th>
-              <th className="p-4 font-medium">Stock</th>
-              <th className="p-4 font-medium text-right">Actions</th>
+            <tr className="border-b border-outline-variant/30 text-on-surface-variant text-xs font-medium bg-surface-container/50">
+              <th className="px-5 py-4">Product Details</th>
+              <th className="px-5 py-4">SKU</th>
+              <th className="px-5 py-4">Category</th>
+              <th className="px-5 py-4 text-right">Stock</th>
+              <th className="px-5 py-4 text-right">Price</th>
+              <th className="px-5 py-4">Status</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan="5" className="p-8 text-center text-gray-400">Loading products...</td></tr>
+              <tr><td colSpan="6" className="p-8 text-center text-on-surface-variant">Loading products...</td></tr>
             ) : products?.length === 0 ? (
-              <tr><td colSpan="5" className="p-8 text-center text-gray-400">No products found. Add one above.</td></tr>
+              <tr><td colSpan="6" className="p-8 text-center text-on-surface-variant">No products found.</td></tr>
             ) : (
               products?.map(product => (
-                <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                  <td className="p-4 font-mono text-sm text-gray-400">{product.sku}</td>
-                  <td className="p-4 font-medium">{product.name}</td>
-                  <td className="p-4 text-emerald-400 font-mono">${product.price.toFixed(2)}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.quantity_in_stock < 10 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
-                      {product.quantity_in_stock} in stock
-                    </span>
+                <tr key={product.id} className="border-b border-outline-variant/20 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>
+                  <td className="px-5 py-4 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+                        <Laptop size={20} />
+                    </div>
+                    <div>
+                        <div className="font-medium text-sm text-on-surface">{product.name}</div>
+                        <div className="text-xs text-on-surface-variant mt-0.5">{product.description || 'No description'}</div>
+                    </div>
                   </td>
-                  <td className="p-4 flex justify-end gap-2">
-                    <button onClick={() => openEdit(product)} className="p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition"><Edit2 size={18} /></button>
-                    <button onClick={() => handleDelete(product.id)} className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition"><Trash2 size={18} /></button>
+                  <td className="px-5 py-4 text-on-surface-variant text-sm">{product.sku}</td>
+                  <td className="px-5 py-4 text-on-surface-variant text-sm">{product.category || '-'}</td>
+                  <td className="px-5 py-4 text-right tnum font-medium text-sm">
+                    <span className={product.quantity_in_stock <= (product.threshold || 10) ? 'text-error' : 'text-on-surface'}>{product.quantity_in_stock}</span>
+                  </td>
+                  <td className="px-5 py-4 text-right tnum font-medium text-sm text-on-surface">₹{product.price.toFixed(2)}</td>
+                  <td className="px-5 py-4">
+                    {getStatusBadge(product.quantity_in_stock, product.threshold)}
                   </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+        
+        <div className="p-4 border-t border-outline-variant/30 flex items-center justify-between text-sm text-on-surface-variant bg-surface-container/30">
+            <span>Showing {products?.length ? `1-${products.length}` : '0'} of {products?.length || 0} products</span>
+            <div className="flex items-center gap-4">
+                <button className="flex items-center hover:text-on-surface disabled:opacity-50" disabled><ChevronLeft size={16}/> Page 1 of 1 <ChevronRight size={16}/></button>
+            </div>
+        </div>
       </div>
 
       <ProductModal 

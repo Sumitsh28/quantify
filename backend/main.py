@@ -7,7 +7,7 @@ from sqlalchemy import text
 from database import engine, SessionLocal
 from logger import logger, correlation_id_ctx
 from middleware import TracingMiddleware
-from routers import products, customers, orders
+from routers import products, customers, orders, notifications
 
 # Background task to refresh materialized view
 async def refresh_materialized_view():
@@ -42,6 +42,7 @@ app.add_middleware(TracingMiddleware)
 app.include_router(products.router, prefix="/api/v1")
 app.include_router(customers.router, prefix="/api/v1")
 app.include_router(orders.router, prefix="/api/v1")
+app.include_router(notifications.router, prefix="/api/v1")
 
 # Global Exception Handler
 @app.exception_handler(Exception)

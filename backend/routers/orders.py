@@ -21,7 +21,7 @@ def create_order(
     if not customer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
 
-    total_amount = 0.0
+    subtotal = 0.0
     
     # We must start a transaction to ensure ACID
     try:
@@ -46,10 +46,15 @@ def create_order(
                 db.rollback()
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=conflict_msg)
             
-            total_amount += product.price * item.quantity
+            subtotal += product.price * item.quantity
+
+        total_amount = subtotal + order.shipping + order.tax
 
         new_order = models.Order(
             customer_id=order.customer_id,
+            subtotal=subtotal,
+            shipping=order.shipping,
+            tax=order.tax,
             total_amount=total_amount
         )
         db.add(new_order)
