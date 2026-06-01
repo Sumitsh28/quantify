@@ -13,6 +13,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
@@ -26,14 +27,13 @@ RUN pip install --no-cache-dir gunicorn uvicorn fastapi
 # Copy the application code
 COPY . .
 
-# Change ownership of the application to the non-root user
-RUN chown -R appuser:appuser /app
+# Make start.sh executable and change ownership
+RUN chmod +x start.sh && chown -R appuser:appuser /app
 
 # Switch to the non-root user
 USER appuser
 
 EXPOSE 8000
 
-# Start Gunicorn with Uvicorn workers
-# Gunicorn intercepts SIGTERM for graceful shutdown by default
-CMD ["gunicorn", "main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+# Start script handles migrations and starts gunicorn
+CMD ["./start.sh"]

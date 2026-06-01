@@ -17,9 +17,9 @@ FROM nginx:alpine
 # Vite outputs to /dist by default
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy a custom nginx configuration for the frontend if needed (usually handled at the edge/gateway level, but good practice for SPA routing)
-# RUN rm /etc/nginx/conf.d/default.conf
-# COPY nginx.conf /etc/nginx/conf.d
+# Copy a custom nginx configuration for the frontend SPA routing
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 

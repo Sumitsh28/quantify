@@ -21,6 +21,7 @@ export const deleteCustomer = async (id) => await api.delete(`/customers/${id}`)
 export const fetchOrders = async () => (await api.get('/orders')).data;
 export const createOrder = async ({ idempotencyKey, data }) => 
   (await api.post('/orders', data, { headers: { 'Idempotency-Key': idempotencyKey } })).data;
+export const deleteOrder = async (id) => await api.delete(`/orders/${id}`);
 
 export const fetchDashboardMetrics = async () => {
     // We will need to implement this endpoint in the backend. 
