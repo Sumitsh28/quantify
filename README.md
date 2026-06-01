@@ -260,7 +260,7 @@ As the Quantify platform grows to support tens of thousands of active concurrent
 ## 🌐 Deployed Application URLs
 Once you deploy the application, you can access the live environments here:
 
-- **Frontend Application (Vercel/Netlify):** [https://quantify-app.yourdomain.com](https://quantify-app.yourdomain.com) 
+- **Frontend Application (Vercel):** [https://quantify-lilac.vercel.app/](https://quantify-lilac.vercel.app/) 
 - **Backend API Base URL (Railway):** [https://quantify-production-dc5f.up.railway.app](https://quantify-production-dc5f.up.railway.app) 
 - **Interactive API Swagger Docs:** [https://quantify-production-dc5f.up.railway.app/docs](https://quantify-production-dc5f.up.railway.app/docs)
 
