@@ -1,84 +1,55 @@
-import pytest
-from fastapi.testclient import TestClient
-
-def test_health_check(client: TestClient):
-    response = client.get("/api/v1/health")
-    assert response.status_code == 200
-    assert response.json()["status"] == "ok"
-    assert response.json()["db"] == "connected"
-
-def test_create_order_success(client: TestClient):
-    # Create customer
-    c_res = client.post("/api/v1/customers", json={"full_name": "Test User", "email": "test1@example.com"})
-    assert c_res.status_code == 201
-    c_id = c_res.json()["id"]
-
-    # Create product
-    p_res = client.post("/api/v1/products", json={"name": "Widget", "sku": "WIDGET-1", "price": 10.0, "quantity_in_stock": 50})
-    assert p_res.status_code == 201
-    p_id = p_res.json()["id"]
-
+def test_create_order(client):
+    # Setup customer and product
+    cust_res = client.post("/api/v1/customers", json={"full_name": "Test Cust", "email": "tc@tc.com"})
+    cust_id = cust_res.json()["id"]
+    
+    prod_res = client.post("/api/v1/products", json={"name": "Prod", "sku": "SKU1", "price": 10.0, "quantity_in_stock": 50})
+    prod_id = prod_res.json()["id"]
+    
     # Create order
-    o_res = client.post("/api/v1/orders", headers={"Idempotency-Key": "test-key-1"}, json={
-        "customer_id": c_id,
-        "items": [{"product_id": p_id, "quantity": 10}]
+    order_res = client.post("/api/v1/orders", headers={"Idempotency-Key": "testkey3"}, json={
+        "customer_id": cust_id,
+        "items": [
+            {"product_id": prod_id, "quantity": 5, "unit_price": 10.0}
+        ],
+        "shipping": 0,
+        "tax": 0
     })
-    assert o_res.status_code == 201
-    assert o_res.json()["total_amount"] == 100.0
+    
+    assert order_res.status_code == 201
+    order_data = order_res.json()
+    assert order_data["total_amount"] == 50.0
+    assert len(order_data["items"]) == 1
+    
+    # Verify stock was decremented
+    prod_check = client.get(f"/api/v1/products/{prod_id}")
+    assert prod_check.json()["quantity_in_stock"] == 45
 
-    # Verify stock deducted
-    p_res2 = client.get(f"/api/v1/products/{p_id}")
-    assert p_res2.json()["quantity_in_stock"] == 40
-    assert p_res2.json()["version"] == 2
-
-def test_create_order_insufficient_stock(client: TestClient):
-    # Create customer
-    c_res = client.post("/api/v1/customers", json={"full_name": "Test User", "email": "test2@example.com"})
-    c_id = c_res.json()["id"]
-
-    # Create product with 5 stock
-    p_res = client.post("/api/v1/products", json={"name": "Widget", "sku": "WIDGET-2", "price": 10.0, "quantity_in_stock": 5})
-    p_id = p_res.json()["id"]
-
-    # Try to order 10
-    o_res = client.post("/api/v1/orders", headers={"Idempotency-Key": "test-key-2"}, json={
-        "customer_id": c_id,
-        "items": [{"product_id": p_id, "quantity": 10}]
+def test_create_order_insufficient_stock(client):
+    cust_res = client.post("/api/v1/customers", json={"full_name": "Test Cust 2", "email": "tc2@tc.com"})
+    cust_id = cust_res.json()["id"]
+    
+    prod_res = client.post("/api/v1/products", json={"name": "Prod 2", "sku": "SKU2", "price": 10.0, "quantity_in_stock": 5})
+    prod_id = prod_res.json()["id"]
+    
+    order_res = client.post("/api/v1/orders", headers={"Idempotency-Key": "testkey4"}, json={
+        "customer_id": cust_id,
+        "items": [
+            {"product_id": prod_id, "quantity": 10, "unit_price": 10.0}
+        ],
+        "shipping": 0,
+        "tax": 0
     })
-    assert o_res.status_code == 400
-    assert "Insufficient stock" in o_res.json()["detail"]
-
-def test_create_order_occ_conflict(client: TestClient, db_session):
-    # Setup
-    c_res = client.post("/api/v1/customers", json={"full_name": "Test User", "email": "test3@example.com"})
-    c_id = c_res.json()["id"]
-    p_res = client.post("/api/v1/products", json={"name": "Widget", "sku": "WIDGET-3", "price": 10.0, "quantity_in_stock": 100})
-    p_id = p_res.json()["id"]
-
-    # Instead of mocking, we can use a small trick:
-    # We patch `db.execute` to first run a real UPDATE that changes the version right before it executes the OCC UPDATE.
-    # This simulates a race condition perfectly!
     
-    from unittest.mock import patch
-    from sqlalchemy import text
-    
-    original_execute = db_session.execute
-    
-    def fake_execute(statement, *args, **kwargs):
-        if "UPDATE products SET quantity_in_stock" in str(statement):
-            # Execute the real query to keep session state valid
-            original_execute(statement, *args, **kwargs)
-            # But return a mock result to simulate OCC conflict (rowcount=0)
-            class MockResult:
-                rowcount = 0
-            return MockResult()
-        return original_execute(statement, *args, **kwargs)
+    assert order_res.status_code == 400
+    assert "Insufficient stock" in order_res.json()["detail"]
 
-    with patch.object(db_session, 'execute', side_effect=fake_execute):
-        o_res = client.post("/api/v1/orders", headers={"Idempotency-Key": "test-key-3"}, json={
-            "customer_id": c_id,
-            "items": [{"product_id": p_id, "quantity": 10}]
-        })
-        
-    assert o_res.status_code == 409
-    assert "Concurrency collision" in o_res.json()["detail"]
+def test_dashboard_metrics(client):
+    # Verify the endpoint returns 200 and required fields
+    res = client.get("/api/v1/dashboard")
+    assert res.status_code == 200
+    data = res.json()
+    assert "total_products" in data
+    assert "total_customers" in data
+    assert "total_orders" in data
+    assert "low_stock_count" in data

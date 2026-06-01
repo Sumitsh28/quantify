@@ -128,7 +128,7 @@ const Layout = () => {
           </div>
           
           <div className="flex items-center gap-2 sm:gap-4 text-on-surface-variant">
-            <button onClick={toggleTheme} className="p-2 rounded-full transition-colors hover:text-on-surface hover:bg-surface-variant/50">
+            <button aria-label="Toggle Theme" onClick={toggleTheme} className="p-2 rounded-full transition-colors hover:text-on-surface hover:bg-surface-variant/50">
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <NavLink to="/notifications" className={({ isActive }) => `relative p-2 rounded-full transition-colors ${isActive ? 'text-inverse-primary bg-surface-variant/30' : 'hover:text-on-surface hover:bg-surface-variant/50'}`}>

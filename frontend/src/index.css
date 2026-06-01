@@ -6,63 +6,63 @@
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --on-background: #0f172a;
+    --background: 248 250 252;
+    --on-background: 15 23 42;
     
-    --surface-container-lowest: #ffffff;
-    --surface-container-low: #f8fafc;
-    --surface-container: #f1f5f9;
-    --surface-container-high: #e2e8f0;
-    --surface-container-highest: #cbd5e1;
+    --surface-container-lowest: 255 255 255;
+    --surface-container-low: 248 250 252;
+    --surface-container: 241 245 249;
+    --surface-container-high: 226 232 240;
+    --surface-container-highest: 203 213 225;
     
-    --on-surface: #0f172a;
-    --on-surface-variant: #475569;
+    --on-surface: 15 23 42;
+    --on-surface-variant: 71 85 105;
     
-    --inverse-surface: #1e293b;
-    --inverse-on-surface: #f8fafc;
+    --inverse-surface: 30 41 59;
+    --inverse-on-surface: 248 250 252;
     
-    --outline: #94a3b8;
-    --outline-variant: #cbd5e1;
+    --outline: 148 163 184;
+    --outline-variant: 203 213 225;
     
-    --primary: #494bd6;
-    --on-primary: #ffffff;
-    --inverse-primary: #494bd6;
+    --primary: 73 75 214;
+    --on-primary: 255 255 255;
+    --inverse-primary: 73 75 214;
     
-    --error: #ef4444;
-    --error-container: #fee2e2;
+    --error: 239 68 68;
+    --error-container: 254 226 226;
     
-    --secondary: #0ea5e9;
-    --secondary-fixed-dim: #0284c7;
+    --secondary: 14 165 233;
+    --secondary-fixed-dim: 2 132 199;
   }
 
   .dark {
-    --background: #13131b;
-    --on-background: #e4e1ed;
+    --background: 19 19 27;
+    --on-background: 228 225 237;
     
-    --surface-container-lowest: #0d0d15;
-    --surface-container-low: #1b1b23;
-    --surface-container: #1f1f27;
-    --surface-container-high: #292932;
-    --surface-container-highest: #34343d;
+    --surface-container-lowest: 13 13 21;
+    --surface-container-low: 27 27 35;
+    --surface-container: 31 31 39;
+    --surface-container-high: 41 41 50;
+    --surface-container-highest: 52 52 61;
     
-    --on-surface: #e4e1ed;
-    --on-surface-variant: #c7c4d7;
+    --on-surface: 228 225 237;
+    --on-surface-variant: 199 196 215;
     
-    --inverse-surface: #e4e1ed;
-    --inverse-on-surface: #303038;
+    --inverse-surface: 228 225 237;
+    --inverse-on-surface: 48 48 56;
     
-    --outline: #908fa0;
-    --outline-variant: #464554;
+    --outline: 144 143 160;
+    --outline-variant: 70 69 84;
     
-    --primary: #c0c1ff;
-    --on-primary: #1000a9;
-    --inverse-primary: #494bd6;
+    --primary: 192 193 255;
+    --on-primary: 16 0 169;
+    --inverse-primary: 73 75 214;
     
-    --error: #ffb4ab;
-    --error-container: #93000a;
+    --error: 255 180 171;
+    --error-container: 147 0 10;
     
-    --secondary: #89ceff;
-    --secondary-fixed-dim: #89ceff;
+    --secondary: 137 206 255;
+    --secondary-fixed-dim: 137 206 255;
   }
 
   body {
